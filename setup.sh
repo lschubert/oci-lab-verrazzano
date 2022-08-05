@@ -5,7 +5,7 @@ export LANG=C.UTF-8
 # for ansible
 export ANSIBLE_HOST_KEY_CHECKING=False
 export ANSIBLE_STDOUT_CALLBACK=debug
-# Read environment variables
+# Read environment variables for app deployment
 ### MY_REGISTRY_USER is used to configure pull secret in OKE
 if [[ ! -v MY_REGISTRY_USER ]];
 then
@@ -24,9 +24,16 @@ if [[ ! -v REGISTRY_AUTH_TOKEN ]];
 then
   read -p "Enter auth token for Oracle registry (REGISTRY_AUTH_TOKEN) - input will be hidden: " -s REGISTRY_AUTH_TOKEN
   export REGISTRY_AUTH_TOKEN
+  echo 
 fi
+export WLS_USERNAME=weblogic
+export WLS_PASSWORD=$((< /dev/urandom tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | head -c10);(date +%S))
+echo "Generated WLS_PASSWORD: $WLS_PASSWORD"
 
 ansible-playbook setup.yml -e "registry_auth_token=${REGISTRY_AUTH_TOKEN} my_registry_user=${MY_REGISTRY_USER} my_registry_pass=${MY_REGISTRY_PASS}"
+echo
+echo "Generated WLS_PASSWORD: $WLS_PASSWORD"
+echo
 # reload current bash environment
 if [[ ! -f "${HOME}/.config/.luna-lab-setup" ]]; then
     echo "reloading bash..."
