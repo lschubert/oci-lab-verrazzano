@@ -1,0 +1,6 @@
+---
+- name: Configure executor
+  hosts: localhost
+  vars_files: main.yml
+  roles:
+    - { role: configure-executor }

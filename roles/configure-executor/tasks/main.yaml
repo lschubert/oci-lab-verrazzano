@@ -1,0 +1,9 @@
+---
+- name: configure environment in .bashrc
+  blockinfile:
+    path: $HOME/.bashrc
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+      # for oci cmdline tool
+      export LC_ALL=C.UTF-8
+      export LANG=C.UTF-8
