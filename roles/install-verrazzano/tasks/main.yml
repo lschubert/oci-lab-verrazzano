@@ -100,5 +100,5 @@
     - vz_prometheusUrl_url
 - name: generate bookmarks.html
   template:
-    src: templates/Bookmarks.j2
-    dest: $HOME/Desktop/Bookmarks
+    src: templates/bookmark-import.j2
+    dest: $HOME/Desktop/bookmarks.html
