@@ -42,27 +42,35 @@
     src: templates/auth.j2
     dest: ${HOME}/.config/containers/auth.json
     mode: 0600
+
 - name: check if bobs-books-repo-credentials secret already exists
   shell: |
     kubectl get secret bobs-books-repo-credentials -n bobs-books --no-headers | grep -ci bobs-books-repo-credentials
   register: secret_check
   ignore_errors: true
+- name: delete bobs-books-repo-credentials secret
+  shell: |
+    kubectl delete secret bobs-books-repo-credentials -n bobs-books
+  when: secret_check.stdout == "1"
 - name: create bobs-books-repo-credentials secret
   shell: |
     kubectl create secret docker-registry bobs-books-repo-credentials  --docker-server=container-registry.oracle.com  --docker-username={{ my_registry_user }} --docker-password={{ my_registry_pass }} --docker-email=$1  -n bobs-books
   register: create_secret_result
-  when: secret_check.stdout == "0"
   failed_when: "'secret/bobs-books-repo-credentials created' not in create_secret_result.stdout"
+
 - name: check if bobbys-front-end-weblogic-credentials secret already exists
   shell: |
-    kubectl get secret bobbys-front-end-weblogic-credentials -n bobs-books --no-headers | grep -ci bobs-books-repo-credentials
+    kubectl get secret bobbys-front-end-weblogic-credentials -n bobs-books --no-headers | grep -ci bobbys-front-end-weblogic-credentials
   register: secret2_check
   ignore_errors: true
+- name: delete bobbys-front-end-weblogic-credentials secret
+  shell: |
+    kubectl delete secret bobbys-front-end-weblogic-credentials -n bobs-books
+  when: secret2_check.stdout == "1"
 - name: create bobbys-front-end-weblogic-credentials secret
   shell: |
     kubectl create secret generic bobbys-front-end-weblogic-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} -n bobs-books
   register: create_secret2_result
-  when: secret2_check.stdout == "0"
   failed_when: "'secret/bobbys-front-end-weblogic-credentials created' not in create_secret2_result.stdout"
 
 - name: check if bobs-bookstore-weblogic-credentials secret already exists
@@ -70,11 +78,14 @@
     kubectl get secret bobs-bookstore-weblogic-credentials -n bobs-books --no-headers | grep -ci bobs-bookstore-weblogic-credentials
   register: secret3_check
   ignore_errors: true
+- name: delete bobs-bookstore-weblogic-credentials secret
+  shell: |
+    kubectl delete secret bobs-bookstore-weblogic-credentials -n bobs-books
+  when: secret3_check.stdout == "1"
 - name: create bobs-bookstore-weblogic-credentials secret
   shell: |
     kubectl create secret generic bobs-bookstore-weblogic-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} -n bobs-books
   register: create_secret3_result
-  when: secret3_check.stdout == "0"
   failed_when: "'secret/bobs-bookstore-weblogic-credentials created' not in create_secret3_result.stdout"
 
 - name: check if mysql-credentials secret already exists
@@ -82,9 +93,12 @@
     kubectl get secret mysql-credentials -n bobs-books --no-headers | grep -ci mysql-credentials
   register: secret4_check
   ignore_errors: true
+- name: delete mysql-credentials secret
+  shell: |
+    kubectl delete secret mysql-credentials -n bobs-books
+  when: secret4_check.stdout == "1"
 - name: create mysql-credentials secret
   shell: |
     kubectl create secret generic mysql-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} --from-literal=url=jdbc:mysql://mysql.bobs-books.svc.cluster.local:3306/books -n bobs-books
   register: create_secret4_result
-  when: secret3_check.stdout == "0"
   failed_when: "'secret/mysql-credentials created' not in create_secret4_result.stdout"
