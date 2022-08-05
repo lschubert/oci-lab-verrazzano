@@ -1,14 +1,14 @@
 ---
-# - name: Configure executor
-#   hosts: localhost
-#   vars_files: main.yml
-#   roles:
-#     - { role: configure-executor }
-# - name: Install Verrazzano
-#   hosts: localhost
-#   vars_files: main.yml
-#   roles:
-#     - { role: install-verrazzano }
+- name: Configure executor
+  hosts: localhost
+  vars_files: main.yml
+  roles:
+    - { role: configure-executor }
+- name: Install Verrazzano
+  hosts: localhost
+  vars_files: main.yml
+  roles:
+    - { role: install-verrazzano }
 - name: Deploy Applications
   hosts: localhost
   vars_files: main.yml
