@@ -48,35 +48,35 @@
   when: debug_output == true
 - name: get consoleUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .consoleUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .consoleUrl
   register: vz_url_console_result
 - name: get elasticUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .elasticUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .elasticUrl
   register: vz_url_elasticUrl_result
 - name: get grafanaUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .grafanaUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .grafanaUrl
   register: vz_url_grafanaUrl_result  
 - name: get keyCloakUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .keyCloakUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .keyCloakUrl
   register: vz_url_keyCloakUrl_result  
 - name: get kialiUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .kialiUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .kialiUrl
   register: vz_url_kialiUrl_result  
 - name: get kibanaUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .kibanaUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .kibanaUrl
   register: vz_url_kibanaUrl_result  
 - name: get prometheusUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .prometheusUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .prometheusUrl
   register: vz_url_prometheusUrl_result 
 - name: get rancherUrl
   shell: |
-    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .rancherUrl
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq -r .rancherUrl
   register: vz_url_rancherUrl_result 
 - name: set facts
   set_fact:
@@ -100,5 +100,5 @@
     - vz_prometheusUrl_url
 - name: generate bookmarks.html
   template:
-    src: templates/bookmarks.j2
-    dest: $HOME/Desktop/bookmarks.html
+    src: templates/Bookmarks.j2
+    dest: $HOME/Desktop/Bookmarks
