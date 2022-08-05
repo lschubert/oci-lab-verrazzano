@@ -63,7 +63,7 @@
 
 - name: check if bobs-bookstore-weblogic-credentials secret already exists
   shell: |
-    kubectl get secret bobs-bookstore-weblogic-credentials -n bobs-books --no-headers | grep -ci bobs-books-repo-credentials
+    kubectl get secret bobs-bookstore-weblogic-credentials -n bobs-books --no-headers | grep -ci bobs-bookstore-weblogic-credentials
   register: secret3_check
   ignore_errors: true
 - name: create bobs-bookstore-weblogic-credentials secret
@@ -72,3 +72,15 @@
   register: create_secret3_result
   when: secret3_check.stdout == "0"
   failed_when: "'secret/bobs-bookstore-weblogic-credentials created' not in create_secret3_result.stdout"
+
+- name: check if mysql-credentials secret already exists
+  shell: |
+    kubectl get secret mysql-credentials -n bobs-books --no-headers | grep -ci mysql-credentials
+  register: secret4_check
+  ignore_errors: true
+- name: create mysql-credentials secret
+  shell: |
+    kubectl create secret generic mysql-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} --from-literal=url=jdbc:mysql://mysql.bobs-books.svc.cluster.local:3306/books -n bobs-books
+  register: create_secret4_result
+  when: secret3_check.stdout == "0"
+  failed_when: "'secret/mysql-credentials created' not in create_secret4_result.stdout"
