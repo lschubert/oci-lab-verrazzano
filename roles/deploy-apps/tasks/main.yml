@@ -38,8 +38,25 @@
     src: templates/auth.j2
     dest: ${HOME}/.config/containers/auth.json
     mode: 0600
-- name: create secret
+- name: check if bobs-books-repo-credentials secret already exists
+  shell: |
+    kubectl get secret bobs-books-repo-credentials -n bobs-books --no-headers | grep -ci bobs-books-repo-credentials
+  register: secret_check
+  ignore_errors: true
+- name: create bobs-books-repo-credentials secret
   shell: |
     kubectl create secret docker-registry bobs-books-repo-credentials  --docker-server=container-registry.oracle.com  --docker-username={{ my_registry_user }} --docker-password={{ my_registry_pass }} --docker-email=$1  -n bobs-books
   register: create_secret_result
+  when: secret_check.stdout == "0"
   failed_when: "'secret/bobs-books-repo-credentials created' not in create_secret_result.stdout"
+- name: check if bobbys-front-end-weblogic-credentials secret already exists
+  shell: |
+    kubectl get secret bobbys-front-end-weblogic-credentials -n bobs-books --no-headers | grep -ci bobs-books-repo-credentials
+  register: secret2_check
+  ignore_errors: true
+- name: create bobbys-front-end-weblogic-credentials secret
+  shell: |
+    kubectl create secret generic bobbys-front-end-weblogic-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} -n bobs-books
+  register: create_secret2_result
+  when: secret2_check.stdout == "0"
+  failed_when: "'secret/bobbys-front-end-weblogic-credentials created' not in create_secret2_result.stdout"

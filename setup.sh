@@ -27,10 +27,9 @@ then
   echo 
 fi
 export WLS_USERNAME=weblogic
-export WLS_PASSWORD=$((< /dev/urandom tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | head -c10);(date +%S))
-echo "Generated WLS_PASSWORD: $WLS_PASSWORD"
+export WLS_PASSWORD=$((< /dev/urandom tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | head -c10);(date +%S))s
 
-ansible-playbook setup.yml -e "registry_auth_token=${REGISTRY_AUTH_TOKEN} my_registry_user=${MY_REGISTRY_USER} my_registry_pass=${MY_REGISTRY_PASS}"
+ansible-playbook setup.yml -e "registry_auth_token=${REGISTRY_AUTH_TOKEN} my_registry_user=${MY_REGISTRY_USER} my_registry_pass=${MY_REGISTRY_PASS} wls_username=${WLS_username} wls_password=${WLS_PASSWORD}"
 echo
 echo "Generated WLS_PASSWORD: $WLS_PASSWORD"
 echo
