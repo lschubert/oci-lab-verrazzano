@@ -1,0 +1,104 @@
+---
+- name: Install platform operator
+  shell: |
+    kubectl apply -f https://github.com/verrazzano/verrazzano/releases/download/v"{{ v8o_version }}"/operator.yaml
+  register: v8o_install
+- name: DEBUG
+  debug:
+    var: v8o_install
+  when: debug_output == true
+- name: Check deployment status
+  shell: |
+    kubectl -n verrazzano-install rollout status deployment/verrazzano-platform-operator
+  register: v8o_deployment_result
+- name: DEBUG
+  debug:
+    var: v8o_deployment_result
+  when: debug_output == true
+- name: Check operator pod status
+  shell: |
+    kubectl -n verrazzano-install get pods
+  register: v8o_pod_result
+- name: DEBUG
+  debug:
+    var: v8o_pod_result
+  when: debug_output == true
+- name: provide verrazano.yml
+  template:
+    src: templates/verrazzano.j2
+    dest: $HOME/verrazzano.yml
+- name: Install Verrazzano
+  shell: |
+    kubectl apply -f $HOME/verrazzano.yml
+  register: v8o_install_result
+- name: DEBUG
+  debug:
+    var: v8o_install_result
+  when: debug_output == true
+- name: wait for installation to complete
+  shell: |
+    kubectl wait --timeout=20m --for=condition=InstallComplete verrazzano/example-verrazzano
+- name: get pods in verrazzano-system
+  shell: |
+    kubectl get pods -n verrazzano-system
+  register: verrazzano_pod_result
+- name: DEBUG
+  debug:
+    var: verrazzano_pod_result
+  when: debug_output == true
+- name: get consoleUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .consoleUrl
+  register: vz_url_console_result
+- name: get elasticUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .elasticUrl
+  register: vz_url_elasticUrl_result
+- name: get grafanaUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .grafanaUrl
+  register: vz_url_grafanaUrl_result  
+- name: get keyCloakUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .keyCloakUrl
+  register: vz_url_keyCloakUrl_result  
+- name: get kialiUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .kialiUrl
+  register: vz_url_kialiUrl_result  
+- name: get kibanaUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .kibanaUrl
+  register: vz_url_kibanaUrl_result  
+- name: get prometheusUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .prometheusUrl
+  register: vz_url_prometheusUrl_result 
+- name: get rancherUrl
+  shell: |
+    kubectl get vz -o jsonpath="{.items[].status.instance}" | jq .rancherUrl
+  register: vz_url_rancherUrl_result 
+- name: set facts
+  set_fact:
+    vz_console_url: "{{ vz_url_console_result.stdout }}"
+    vz_elasticUrl_url: "{{ vz_url_elasticUrl_result.stdout }}"
+    vz_grafanaUrl_url: "{{ vz_url_grafanaUrl_result.stdout }}"
+    vz_keyCloakUrl_url: "{{ vz_url_keyCloakUrl_result.stdout }}"
+    vz_kialiUrl_url: "{{ vz_url_kialiUrl_result.stdout }}"
+    vz_kibanaUrl_url: "{{ vz_url_kibanaUrl_result.stdout }}"
+    vz_prometheusUrl_url: "{{ vz_url_prometheusUrl_result.stdout }}"
+- name: print facts
+  debug:
+    var: "{{ item }}"
+  loop: 
+    - vz_console_url
+    - vz_elasticUrl_url
+    - vz_grafanaUrl_url
+    - vz_keyCloakUrl_url
+    - vz_kialiUrl_url
+    - vz_kibanaUrl_url
+    - vz_prometheusUrl_url
+- name: generate bookmarks.html
+  template:
+    src: templates/bookmarks.j2
+    dest: $HOME/Desktop/bookmarks.html

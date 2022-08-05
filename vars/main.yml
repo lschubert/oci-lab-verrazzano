@@ -1,3 +1,8 @@
+# Verrazzano operator version to be installed
+v8o_version: 1.2.1
+# Verrazzano profile type {dev, prod, managed-cluster} to be installed
+v8o_profile: dev
+
 # install_user: os user for installing the ocne components
 install_user: oracle
 # oci_executor: true: execute ansible playbook from oci lab environment; false: execute from anywhere according to README.md instructions

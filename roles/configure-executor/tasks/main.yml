@@ -7,6 +7,9 @@
       # for oci cmdline tool
       export LC_ALL=C.UTF-8
       export LANG=C.UTF-8
+      # for ansible
+      export ANSIBLE_HOST_KEY_CHECKING=False
+      export ANSIBLE_STDOUT_CALLBACK=debug
 - name: gather OKE cluster id
   shell: |
     oci ce cluster list --compartment-id ${OCI_COMPARTMENT_OCID} | jq -r .[][].id
@@ -26,7 +29,6 @@
 - name: print facts
   debug:
     var: "{{ item }}"
-  when: debug_output == true
   loop: 
     - oci_cluster_id
     - oci_home_region
