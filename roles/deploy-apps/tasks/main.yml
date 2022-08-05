@@ -1,4 +1,8 @@
 ---
+- name: Create files download directory
+  file:
+    path: "{{ playbook_dir }}/roles/deploy-apps/files"
+    state: directory
 - name: Download app images from Oracle registry
   uri:
     url: "https://raw.githubusercontent.com/verrazzano/verrazzano/v{{ v8o_version }}/examples/bobs-books/{{ item }}"
