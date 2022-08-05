@@ -31,6 +31,13 @@ This automation is best executed within the Luna Lab environment using Visual St
 
     The automation triggered by ```./setup.sh``` is expected to be idempotent. You can change variables in ```vars/main.yml``` or the automation code itself and re-run the ```./setup.sh``` to reconfigure the setup.
 
+    Potential configuration options are:
+
+    | Variable  | Comment |
+    |------------|---------|
+    | v8o_version | Verrazzano Operator Version (default: 1.2.1) | 
+    | v8o_profile | Verrazzano deployment profile type {dev, prod, managed-cluster} (default: dev) <br> For details see [Verrazzano Custom Resource Definition](https://verrazzano.io/docs/reference/api/verrazzano/verrazzano/) | 
+
     3.3. Import bookmarks to Google Chrome
 
     In Google Chrome choose the "three vertcal dot menu" > "Bookmarks" > Import Bookmarks and Settings... > Choose file 
