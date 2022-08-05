@@ -1,0 +1,45 @@
+---
+- name: Download app images from Oracle registry
+  uri:
+    url: "https://raw.githubusercontent.com/verrazzano/verrazzano/v{{ v8o_version }}/examples/bobs-books/{{ item }}"
+    creates: "{{ playbook_dir }}/roles/deploy-apps/files/{{ item }}"
+    dest: "{{ playbook_dir }}/roles/deploy-apps/files/{{ item }}"
+  register: app_result
+  loop:
+    - bobs-books-app.yaml
+    - bobs-books-comp.yaml
+- name: create namespace config for bobs-books
+  template: 
+    src: templates/namespace.j2
+    dest: "{{ playbook_dir }}/roles/deploy-apps/files/namespace.yml"
+  vars:
+    namespace: bobs-books
+    labels: 
+      - 'verrazzano-managed: "true"'
+      - 'istio-injection: enabled'
+- name: apply kubernetes objects
+  shell: |
+    kubectl apply -f {{ playbook_dir }}/roles/deploy-apps/files/{{ item }}
+  loop:
+    - namespace.yml
+# - name: Download create_secret.sh script
+#   uri:
+#     url: "https://raw.githubusercontent.com/oracle/learning-library/master/developer-library/multicloud/verrazzano/deploy-bobsbook/create_secret.sh"
+#     creates: "{{ playbook_dir }}/roles/deploy-apps/files/create_secret.sh"
+#     dest: "{{ playbook_dir }}/roles/deploy-apps/files/create_secret.sh"
+#     mode: 0777
+#   register: secret_result
+- name: prepare .config
+  file:
+    path: ${HOME}/.config/containers
+    state: directory
+- name: configure auth.json
+  template:
+    src: templates/auth.j2
+    dest: ${HOME}/.config/containers/auth.json
+    mode: 0600
+- name: create secret
+  shell: |
+    kubectl create secret docker-registry bobs-books-repo-credentials  --docker-server=container-registry.oracle.com  --docker-username={{ my_registry_user }} --docker-password={{ my_registry_pass }} --docker-email=$1  -n bobs-books
+  register: create_secret_result
+  failed_when: "'secret/bobs-books-repo-credentials created' not in create_secret_result.stdout"

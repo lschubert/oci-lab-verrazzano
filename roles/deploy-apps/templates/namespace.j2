@@ -1,0 +1,9 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: {{ namespace }}
+  labels:
+{% for label in labels %}
+    {{ label }}
+{% endfor %}
+    
