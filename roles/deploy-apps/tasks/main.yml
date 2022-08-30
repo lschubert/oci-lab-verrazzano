@@ -26,6 +26,7 @@
     kubectl apply -f {{ playbook_dir }}/roles/deploy-apps/files/{{ item }}
   loop:
     - namespace.yml
+### This section is replaced by subsequent individual commands derived from the script content
 # - name: Download create_secret.sh script
 #   uri:
 #     url: "https://raw.githubusercontent.com/oracle/learning-library/master/developer-library/multicloud/verrazzano/deploy-bobsbook/create_secret.sh"
