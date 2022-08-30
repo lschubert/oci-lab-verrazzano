@@ -23,11 +23,56 @@ This automation is best executed within the Luna Lab environment using Visual St
     
     Select "Open Folder" and choose the local path of cloned repo
 
-3. In Lab Environement Visual Studio Code
+3. Gather Registry information on local machine with podman installed
+
+   3.1. Make sure podman is available and started on local machine 
+   ```
+    LSCHUBER@LSCHUBER-mac oci-lab-verrazzano % podman version
+    Client:       Podman Engine
+    Version:      4.1.1
+    API Version:  4.1.1
+    Go Version:   go1.18.3
+    Built:        Tue Jun 14 22:12:46 2022
+    OS/Arch:      darwin/arm64
+
+    Server:       Podman Engine
+    Version:      4.2.0
+    API Version:  4.2.0
+    Go Version:   go1.18.4
+    Built:        Thu Aug 11 16:43:11 2022
+    OS/Arch:      linux/arm64
+
+    LSCHUBER@LSCHUBER-mac oci-lab-verrazzano % podman machine list
+    NAME                     VM TYPE     CREATED      LAST UP            CPUS        MEMORY      DISK SIZE
+    podman-machine-default*  qemu        3 weeks ago  Currently running  1           2.147GB     107.4GB
+   ```
+
+   3.2. Login to Oracle container-registry
+   ```
+   LSCHUBER@LSCHUBER-mac oci-lab-verrazzano % podman login container-registry.oracle.com -u <Oracle-Account-Name>
+   Password: 
+   Login Succeeded!
+   ```
+
+   3.3. Copy auth token
+   ```
+   LSCHUBER@LSCHUBER-mac oci-lab-verrazzano % cat ~/.config/containers/auth.json 
+    {
+            "auths": {
+                    "container-registry.oracle.com": {
+                            "auth": "XXXXXXXXXXXXXXXXXXXXXXX"
+                    }
+            }
+    }%                                              
+   ```
+
+4. In Lab Environement Visual Studio Code
 
     3.1. Select "Terminal > New Terminal"
 
-    3.2. In oci-lab-ocne-gluster folder execute ```./setup.sh```
+    3.2. In oci-lab-ocne-verrazzano folder execute ```./setup.sh```
+
+    Provide MY_REGISTRY_USER (Oracle-Account-Name), MY_REGISTRY_PASS (Password) and REGISTRY_AUTH_TOKEN (from step 3.3. above) for registry container-registry.oracle.com
 
     The automation triggered by ```./setup.sh``` is expected to be idempotent. You can change variables in ```vars/main.yml``` or the automation code itself and re-run the ```./setup.sh``` to reconfigure the setup.
 

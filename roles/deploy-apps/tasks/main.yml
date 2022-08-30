@@ -102,3 +102,18 @@
     kubectl create secret generic mysql-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} --from-literal=url=jdbc:mysql://mysql.bobs-books.svc.cluster.local:3306/books -n bobs-books
   register: create_secret4_result
   failed_when: "'secret/mysql-credentials created' not in create_secret4_result.stdout"
+- name: Deploy application and application configuration
+  shell: |
+    kubectl apply -f {{ playbook_dir }}/roles/deploy-apps/files/{{ item }}
+  register: app_deploy_result
+  loop:
+    - bobs-books-comp.yaml
+    - bobs-books-app.yaml
+- name: Wait for deployment to be ready
+  shell: |
+    kubectl wait --for=condition=Ready pods --all -n bobs-books --timeout=600s
+  register: wait_result
+- name: DEBUG
+  debug:
+    var: wait_result
+  when: debug_output == true
