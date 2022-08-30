@@ -125,3 +125,35 @@
   debug:
     var: wait_result
   when: debug_output == true
+- name: Check if Application is successfully deployed
+  shell: |
+    kubectl get ApplicationConfiguration -n bobs-books
+  register: app_result
+- name: DEBUG
+  debug:
+    var: app_result
+  when: debug_output == true
+- name: Check Weblogic Domains
+  shell: |
+    kubectl get Domain -n bobs-books
+  register: wls_result
+- name: DEBUG
+  debug:
+    var: wls_result
+  when: debug_output == true
+- name: Check Coherence Cluster
+  shell: |
+    kubectl get Coherence -n bobs-books
+  register: coh_result
+- name: DEBUG
+  debug:
+    var: coh_result
+  when: debug_output == true
+- name: Check IngressTrait
+  shell: |
+    kubectl get IngressTrait -n bobs-books
+  register: ing_result
+- name: DEBUG
+  debug:
+    var: ing_result
+  when: debug_output == true
