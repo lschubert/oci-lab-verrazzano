@@ -1,16 +1,8 @@
 ---
-- name: Configure executor
+- name: Setup Lab
   hosts: localhost
   vars_files: main.yml
   roles:
     - { role: configure-executor }
-- name: Install Verrazzano
-  hosts: localhost
-  vars_files: main.yml
-  roles:
     - { role: install-verrazzano }
-- name: Deploy Applications
-  hosts: localhost
-  vars_files: main.yml
-  roles:
     - { role: deploy-apps }
