@@ -32,7 +32,7 @@
   loop: 
     - oci_cluster_id
     - oci_home_region
-- name: Mark executor as configured
-  file:
-    path: ${HOME}/.config/.luna-lab-setup
-    state: touch
+# - name: Mark executor as configured
+#   file:
+#     path: ${HOME}/.config/.luna-lab-setup
+#     state: touch

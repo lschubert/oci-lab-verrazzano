@@ -35,6 +35,7 @@ echo "Generated WLS_PASSWORD: $WLS_PASSWORD"
 echo
 # reload current bash environment
 if [[ ! -f "${HOME}/.config/.luna-lab-setup" ]]; then
+    touch "${HOME}/.config/.luna-lab-setup"
     echo "reloading bash..."
     exec bash
 fi
