@@ -6,4 +6,4 @@
     - { role: configure-executor }
     - { role: install-verrazzano }
     - { role: deploy-apps }
-    - { role: access-apps }
+    - { role: generate-bookmarks }
