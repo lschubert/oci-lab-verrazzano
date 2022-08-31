@@ -102,7 +102,13 @@ This automation is best executed within the Luna Lab environment using Visual St
 |------------|---------|
 | Kubernetes | 1.21.5  |
 
-# Developer info
+2. Automation coverage
 
-* Grafana 
-    * WLS Domains are not shown
+This automation covers the following Lab Tasks 
+
+    1. Setup an Oracle Kubernetes Engine (OKE) instance and prepare executor access
+    2. Install Verrazzano
+    3. Deploy the application
+    4. Access the application and explore other consoles
+
+# Developer info
