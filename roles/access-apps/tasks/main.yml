@@ -1,0 +1,23 @@
+---
+- name: Gather EXTERNAL_IP
+  shell: |
+    kubectl get service -n "istio-system" "istio-ingressgateway" -o jsonpath={.status.loadBalancer.ingress[0].ip}
+  register: ext_ip_result
+- name: Gather Verrazzano Console Password
+  shell: |
+    kubectl get secret --namespace verrazzano-system verrazzano -o jsonpath={.data.password} | base64 --decode; echo
+  register: vz_pass_result
+- name: set facts
+  set_fact:
+    roberts_book_store_url: "https://bobs-books.bobs-books.{{ ext_ip_result.stdout }}.nip.io/"
+    bobs_book_store_url: "https://bobs-books.bobs-books.{{ ext_ip_result.stdout }}.nip.io/bobbys-front-end/"
+    bobs_order_manager_url: "https://bobs-books.bobs-books.{{ ext_ip_result.stdout }}.nip.io/bobs-bookstore-order-manager/orders"
+    vz_console_pass: "{{ vz_pass_result.stdout }}"
+- name: DEBUG
+  debug:
+    var: "{{ item }}"
+  when: debug_output == true
+  loop:
+    - roberts_book_store_url
+    - vz_console_url
+    - vz_console_pass
