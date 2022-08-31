@@ -1,0 +1,9 @@
+---
+- name: Setup Lab
+  hosts: localhost
+  vars_files: main.yml
+  roles:
+    - { role: configure-executor }
+    - { role: install-verrazzano }
+    - { role: deploy-apps }
+    - { role: generate-bookmarks }

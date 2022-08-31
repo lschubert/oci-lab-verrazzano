@@ -1,0 +1,48 @@
+---
+- name: Install platform operator
+  shell: |
+    kubectl apply -f https://github.com/verrazzano/verrazzano/releases/download/v"{{ v8o_version }}"/operator.yaml
+  register: v8o_install
+- name: DEBUG
+  debug:
+    var: v8o_install
+  when: debug_output == true
+- name: Check deployment status
+  shell: |
+    kubectl -n verrazzano-install rollout status deployment/verrazzano-platform-operator
+  register: v8o_deployment_result
+- name: DEBUG
+  debug:
+    var: v8o_deployment_result
+  when: debug_output == true
+- name: Check operator pod status
+  shell: |
+    kubectl -n verrazzano-install get pods
+  register: v8o_pod_result
+- name: DEBUG
+  debug:
+    var: v8o_pod_result
+  when: debug_output == true
+- name: provide verrazano.yml
+  template:
+    src: templates/verrazzano.j2
+    dest: $HOME/verrazzano.yml
+- name: Install Verrazzano
+  shell: |
+    kubectl apply -f $HOME/verrazzano.yml
+  register: v8o_install_result
+- name: DEBUG
+  debug:
+    var: v8o_install_result
+  when: debug_output == true
+- name: wait for installation to complete
+  shell: |
+    kubectl wait --timeout=20m --for=condition=InstallComplete verrazzano/example-verrazzano
+- name: get pods in verrazzano-system
+  shell: |
+    kubectl get pods -n verrazzano-system
+  register: verrazzano_pod_result
+- name: DEBUG
+  debug:
+    var: verrazzano_pod_result
+  when: debug_output == true

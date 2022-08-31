@@ -1,0 +1,159 @@
+---
+- name: Create files download directory
+  file:
+    path: "{{ playbook_dir }}/roles/deploy-apps/files"
+    state: directory
+- name: Download app images from Oracle registry
+  uri:
+    url: "https://raw.githubusercontent.com/verrazzano/verrazzano/v{{ v8o_version }}/examples/bobs-books/{{ item }}"
+    creates: "{{ playbook_dir }}/roles/deploy-apps/files/{{ item }}"
+    dest: "{{ playbook_dir }}/roles/deploy-apps/files/{{ item }}"
+  register: app_result
+  loop:
+    - bobs-books-app.yaml
+    - bobs-books-comp.yaml
+- name: create namespace config for bobs-books
+  template: 
+    src: templates/namespace.j2
+    dest: "{{ playbook_dir }}/roles/deploy-apps/files/namespace.yml"
+  vars:
+    namespace: bobs-books
+    labels: 
+      - 'verrazzano-managed: "true"'
+      - 'istio-injection: enabled'
+- name: apply kubernetes objects
+  shell: |
+    kubectl apply -f {{ playbook_dir }}/roles/deploy-apps/files/{{ item }}
+  loop:
+    - namespace.yml
+### This section is replaced by subsequent individual commands derived from the script content
+# - name: Download create_secret.sh script
+#   uri:
+#     url: "https://raw.githubusercontent.com/oracle/learning-library/master/developer-library/multicloud/verrazzano/deploy-bobsbook/create_secret.sh"
+#     creates: "{{ playbook_dir }}/roles/deploy-apps/files/create_secret.sh"
+#     dest: "{{ playbook_dir }}/roles/deploy-apps/files/create_secret.sh"
+#     mode: 0777
+#   register: secret_result
+- name: prepare .config
+  file:
+    path: ${HOME}/.config/containers
+    state: directory
+- name: configure auth.json
+  template:
+    src: templates/auth.j2
+    dest: ${HOME}/.config/containers/auth.json
+    mode: 0600
+
+- name: check if bobs-books-repo-credentials secret already exists
+  shell: |
+    kubectl get secret bobs-books-repo-credentials -n bobs-books --no-headers | grep -ci bobs-books-repo-credentials
+  register: secret_check
+  ignore_errors: true
+- name: delete bobs-books-repo-credentials secret
+  shell: |
+    kubectl delete secret bobs-books-repo-credentials -n bobs-books
+  when: secret_check.stdout == "1"
+- name: create bobs-books-repo-credentials secret
+  shell: |
+    kubectl create secret docker-registry bobs-books-repo-credentials  --docker-server=container-registry.oracle.com  --docker-username={{ my_registry_user }} --docker-password={{ my_registry_pass }} --docker-email=$1  -n bobs-books
+  register: create_secret_result
+  failed_when: "'secret/bobs-books-repo-credentials created' not in create_secret_result.stdout"
+
+- name: check if bobbys-front-end-weblogic-credentials secret already exists
+  shell: |
+    kubectl get secret bobbys-front-end-weblogic-credentials -n bobs-books --no-headers | grep -ci bobbys-front-end-weblogic-credentials
+  register: secret2_check
+  ignore_errors: true
+- name: delete bobbys-front-end-weblogic-credentials secret
+  shell: |
+    kubectl delete secret bobbys-front-end-weblogic-credentials -n bobs-books
+  when: secret2_check.stdout == "1"
+- name: create bobbys-front-end-weblogic-credentials secret
+  shell: |
+    kubectl create secret generic bobbys-front-end-weblogic-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} -n bobs-books
+  register: create_secret2_result
+  failed_when: "'secret/bobbys-front-end-weblogic-credentials created' not in create_secret2_result.stdout"
+
+- name: check if bobs-bookstore-weblogic-credentials secret already exists
+  shell: |
+    kubectl get secret bobs-bookstore-weblogic-credentials -n bobs-books --no-headers | grep -ci bobs-bookstore-weblogic-credentials
+  register: secret3_check
+  ignore_errors: true
+- name: delete bobs-bookstore-weblogic-credentials secret
+  shell: |
+    kubectl delete secret bobs-bookstore-weblogic-credentials -n bobs-books
+  when: secret3_check.stdout == "1"
+- name: create bobs-bookstore-weblogic-credentials secret
+  shell: |
+    kubectl create secret generic bobs-bookstore-weblogic-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} -n bobs-books
+  register: create_secret3_result
+  failed_when: "'secret/bobs-bookstore-weblogic-credentials created' not in create_secret3_result.stdout"
+
+- name: check if mysql-credentials secret already exists
+  shell: |
+    kubectl get secret mysql-credentials -n bobs-books --no-headers | grep -ci mysql-credentials
+  register: secret4_check
+  ignore_errors: true
+- name: delete mysql-credentials secret
+  shell: |
+    kubectl delete secret mysql-credentials -n bobs-books
+  when: secret4_check.stdout == "1"
+- name: create mysql-credentials secret
+  shell: |
+    kubectl create secret generic mysql-credentials --from-literal=password="{{ wls_password }}" --from-literal=username={{ wls_username }} --from-literal=url=jdbc:mysql://mysql.bobs-books.svc.cluster.local:3306/books -n bobs-books
+  register: create_secret4_result
+  failed_when: "'secret/mysql-credentials created' not in create_secret4_result.stdout"
+- name: Deploy application and application configuration
+  shell: |
+    kubectl apply -f {{ playbook_dir }}/roles/deploy-apps/files/{{ item }} -n bobs-books
+  register: app_deploy_result
+  loop:
+    - bobs-books-comp.yaml
+    - bobs-books-app.yaml
+- name: DEBUG
+  debug:
+    var: app_deploy_result
+  when: debug_output == true
+- name: Wait for deployment to be ready
+  shell: |
+    kubectl wait --for=condition=Ready pods --all -n bobs-books --timeout=600s
+  retries: 25
+  delay: 30
+  until: wait_result.rc == 0
+  register: wait_result
+- name: DEBUG
+  debug:
+    var: wait_result
+  when: debug_output == true
+- name: Check if Application is successfully deployed
+  shell: |
+    kubectl get ApplicationConfiguration -n bobs-books
+  register: app_result
+- name: DEBUG
+  debug:
+    var: app_result
+  when: debug_output == true
+- name: Check Weblogic Domains
+  shell: |
+    kubectl get Domain -n bobs-books
+  register: wls_result
+- name: DEBUG
+  debug:
+    var: wls_result
+  when: debug_output == true
+- name: Check Coherence Cluster
+  shell: |
+    kubectl get Coherence -n bobs-books
+  register: coh_result
+- name: DEBUG
+  debug:
+    var: coh_result
+  when: debug_output == true
+- name: Check IngressTrait
+  shell: |
+    kubectl get IngressTrait -n bobs-books
+  register: ing_result
+- name: DEBUG
+  debug:
+    var: ing_result
+  when: debug_output == true

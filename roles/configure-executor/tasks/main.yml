@@ -1,0 +1,38 @@
+---
+- name: configure environment in .bashrc
+  blockinfile:
+    path: $HOME/.bashrc
+    marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
+    block: |
+      # for oci cmdline tool
+      export LC_ALL=C.UTF-8
+      export LANG=C.UTF-8
+      # for ansible
+      export ANSIBLE_HOST_KEY_CHECKING=False
+      export ANSIBLE_STDOUT_CALLBACK=debug
+- name: gather OKE cluster id
+  shell: |
+    oci ce cluster list --compartment-id ${OCI_COMPARTMENT_OCID} | jq -r '.[][] | select(."lifecycle-state" == "ACTIVE").id'
+  register: oci_cluster_id_result
+- name: gather home region
+  shell: |
+    oci iam region-subscription list |jq -r '.[][] | select(."is-home-region" == true)."region-name"'
+  register: oci_region_result
+- name: configure kubeconfig
+  shell: |
+    oci ce cluster create-kubeconfig --cluster-id "{{ oci_cluster_id_result.stdout }}" --file $HOME/.kube/config --region "{{ oci_region_result.stdout }}" --token-version 2.0.0  --kube-endpoint PUBLIC_ENDPOINT
+  register: kubeconfig_result
+- name: set facts
+  set_fact:
+    oci_cluster_id: "{{ oci_cluster_id_result.stdout }}"
+    oci_home_region: "{{ oci_region_result.stdout }}"
+- name: print facts
+  debug:
+    var: "{{ item }}"
+  loop: 
+    - oci_cluster_id
+    - oci_home_region
+# - name: Mark executor as configured
+#   file:
+#     path: ${HOME}/.config/.luna-lab-setup
+#     state: touch
