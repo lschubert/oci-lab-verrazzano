@@ -1,5 +1,5 @@
 # oci-lab-verrazzano
-Automation to set up OCNE in Oracle provided free lab environment (https://luna.oracle.com/lab/df827e4c-2ca2-4686-84e5-0cb8c8e1e0c5)
+Automation to set up Verrazzano in Oracle provided free lab environment (https://luna.oracle.com/lab/df827e4c-2ca2-4686-84e5-0cb8c8e1e0c5)
 
 At the time this code was created the lab timeslot is limited to 4 hours. This automation code is inteded to execute the lab steps to save some time.
 
